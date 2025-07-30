@@ -1,0 +1,329 @@
+/* --- FILE: frontend/src/App.css (FINAL CONSOLIDATED CODE) --- */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* General Glow Effect (for non-map elements, e.g., crystal ball) */
+@keyframes glow {
+  0%, 100% { filter: drop-shadow(0 0 8px #a855f7) drop-shadow(0 0 20px #a855f7); }
+  50% { filter: drop-shadow(0 0 18px #d8b4fe) drop-shadow(0 0 30px #d8b4fe); }
+}
+.crystal-ball-glow { animation: glow 3s ease-in-out infinite alternate; display: inline-block; }
+
+/* --- The True Night Sky Background (Softer, more depth) --- */
+.constellation-map-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: #000;
+  /* Smoother, deeper space gradient */
+  background-image: radial-gradient(ellipse at bottom, #070d18 0%, #000000 100%);
+  background-size: 150% 150%; /* Make gradient larger for softer blend */
+  animation: background-subtle-shift 15s ease-in-out infinite alternate; /* Very subtle background movement */
+  z-index: 50; overflow-y: auto;
+  cursor: grab; /* Indicate draggable surface */
+}
+@keyframes background-subtle-shift {
+    0%, 100% { background-position: 50% 50%; }
+    50% { background-position: 48% 52%; } /* Very small shift */
+}
+
+@keyframes move-stars { from { background-position-y: 0px; } to { background-position-y: -10000px; } }
+.stars-bg { position: absolute; top: 0; left: 0; right: 0; bottom: -100%; width: 100%; background-repeat: repeat; animation: move-stars linear infinite; }
+.stars1 { background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/stars.png'); animation-duration: 250s; }
+.stars2 { background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/stars2.png'); animation-duration: 180s; }
+.stars3 { background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/stars3.png'); animation-duration: 120s; }
+.animations-paused .stars-bg { animation-play-state: paused; }
+
+/* --- General Map Layout (Spacious but contained) --- */
+.constellation-map-content {
+  position: relative; z-index: 10; padding: 4rem; /* Balanced padding */
+  width: 100%; max-width: 100rem; /* Good width for overview */
+  margin: 0 auto; padding-bottom: 12rem;
+}
+.constellation-map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; color: #d8b4fe; }
+.close-button {
+  background-color: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  padding: 0.6rem 1.2rem; border-radius: 9999px;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  color: #c4b5fd;
+  box-shadow: 0 0 5px rgba(167, 139, 250, 0.2);
+}
+.close-button:hover {
+  background-color: rgba(139, 92, 246, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.4);
+}
+
+/* --- The Grid for Constellations (Refined sizing for overview) --- */
+.constellations-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  grid-template-rows: repeat(4, 250px); /* Keeps them somewhat compact initially */
+  gap: 4rem;
+}
+@media (min-width: 1024px) {
+  .constellations-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 280px);
+    gap: 5rem;
+  }
+}
+
+.constellation-group {
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
+  border-radius: 1.5rem;
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+  overflow: visible; /* ESSENTIAL for star glows to extend */
+  cursor: pointer;
+}
+
+.constellation-group:hover {
+  transform: scale(1.03); /* Subtle scale on hover */
+  box-shadow: 0 0 40px rgba(167, 139, 250, 0.3); /* Soft, diffused glow on hover */
+}
+.active-constellation {
+  background-color: rgba(94, 234, 212, 0.02); /* Very faint background hint */
+  box-shadow: 0 0 50px rgba(94, 234, 212, 0.6), inset 0 0 25px rgba(94, 234, 212, 0.15); /* Stronger, diffused teal glow */
+}
+.constellation-name {
+  text-align: center; font-weight: bold; font-size: 1.8rem; color: #e0e7ff; margin-bottom: 1.5rem;
+  text-shadow: 0 0 10px rgba(255,255,255,0.4), 0 0 20px rgba(196,181,253,0.3);
+  pointer-events: none;
+}
+.signs-container { height: 100%; width: 100%; position: relative; }
+
+
+/* --- Background Stars within Each Constellation Group (Refined twinkle) --- */
+@keyframes background-star-twinkle {
+  0%, 100% { opacity: var(--initial-opacity); }
+  50% { opacity: calc(var(--initial-opacity) * 0.4); }
+}
+.background-stars-container {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  overflow: hidden; /* Contains background stars within their div */
+}
+.background-star {
+  position: absolute; border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 0 1.5px 0.5px rgba(255,255,255,0.9), 0 0 4px 1.5px rgba(255,255,255,0.6); /* Sharper white glow */
+  animation: background-star-twinkle infinite ease-in-out;
+  will-change: transform, opacity;
+}
+
+
+/* --- Ethereal Stardust Lines (Soft, subtle pulse) --- */
+@keyframes line-subtle-pulse {
+  0%, 100% { opacity: 0.3; stroke-width: 1.8px; }
+  50% { opacity: 0.45; stroke-width: 2.2px; } /* Subtle pulse in opacity and width */
+}
+.constellation-lines-svg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  stroke: #c084fc;
+  stroke-width: 1.8px;
+  fill: none;
+  filter: drop-shadow(0 0 8px #c084fc) drop-shadow(0 0 20px #a855f7) blur(0.6px); /* Stronger, softer glow */
+  opacity: 0.3;
+  transition: opacity 0.8s ease-in-out, filter 0.8s ease-in-out, stroke 0.8s ease-in-out;
+  animation: line-subtle-pulse 5s ease-in-out infinite alternate; /* Use new subtle pulse */
+  z-index: 0;
+}
+.constellation-group:hover .constellation-lines-svg {
+  opacity: 0.8;
+  filter: drop-shadow(0 0 10px #c084fc) drop-shadow(0 0 30px #a855f7) blur(0.3px); /* Brighter glow on hover */
+  animation: line-subtle-pulse 2.5s ease-in-out infinite alternate; /* Faster pulse on hover */
+}
+.active-constellation .constellation-lines-svg {
+  stroke: #5eead4;
+  filter: drop-shadow(0 0 12px #5eead4) drop-shadow(0 0 35px #2dd4bf) blur(0.3px);
+  opacity: 1;
+  animation: line-subtle-pulse 1.8s ease-in-out infinite alternate; /* Even more active when selected */
+}
+
+/* --- Main Zodiac Stars (The "sign-node" elements - Balanced glow) --- */
+@keyframes main-star-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  25% { opacity: 0.95; transform: scale(0.99); }
+  50% { opacity: 0.85; transform: scale(0.98); }
+  75% { opacity: 0.95; transform: scale(0.99); }
+}
+.sign-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: transparent; border: none; cursor: pointer;
+  padding: 18px; /* Largest clickable area to ensure easy selection */
+  z-index: 2;
+  will-change: transform;
+}
+.star {
+  width: 100%; height: 100%; border-radius: 50%;
+  background-color: #f0f3ff;
+  transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  animation: main-star-twinkle 3.5s ease-in-out infinite; /* Balanced twinkle speed */
+  box-shadow:
+    0 0 5px 1px #fff,
+    0 0 20px 4px #e0e7ff,
+    0 0 50px 8px #a78bfa,
+    0 0 80px 15px rgba(167, 139, 250, 0.8); /* Strong but diffused initial glow */
+}
+
+/* Varying star sizes and brightness for main zodiac stars */
+.sign-node-1 .star { width: 30px; height: 30px; animation-duration: 3s;
+  box-shadow: 0 0 6px 1.5px #fff, 0 0 25px 5px #e0e7ff, 0 0 70px 12px #a78bfa, 0 0 110px 22px rgba(167, 139, 250, 1);
+}
+.sign-node-2 .star { width: 22px; height: 22px; animation-duration: 4s; }
+.sign-node-3 .star { width: 26px; height: 26px; animation-duration: 3.5s; }
+.sign-node-4 .star { width: 20px; height: 20px; animation-duration: 5s; }
+
+/* Hover and selection effects for main zodiac stars (Clear, distinct) */
+.sign-node:hover .star {
+  transform: scale(1.5) !important; /* Good pop on hover */
+  animation: none; /* Stop twinkle to highlight hover state */
+  box-shadow:
+    0 0 10px 2px #fff,
+    0 0 35px 8px #e0e7ff,
+    0 0 90px 20px #a78bfa,
+    0 0 150px 30px rgba(167, 139, 250, 1.2); /* Intense, bright glow on hover */
+}
+.user-sign .star {
+  box-shadow:
+    0 0 10px 2px #fef08a,
+    0 0 35px 8px #fde047,
+    0 0 90px 20px #facc15,
+    0 0 150px 30px rgba(250, 202, 24, 1.2); /* User sign - distinct yellow */
+  animation: main-star-twinkle 1.8s ease-in-out infinite alternate;
+}
+.selected-sign .star {
+  box-shadow:
+    0 0 10px 2px #6ee7b7,
+    0 0 35px 8px #5eead4,
+    0 0 90px 20px #2dd4bf,
+    0 0 150px 30px rgba(45, 212, 191, 1.2); /* Selected sign - distinct cyan */
+  animation: main-star-twinkle 1.2s ease-in-out infinite alternate;
+}
+
+.sign-tooltip {
+  position: absolute; bottom: 150%; left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  padding: 1rem 1.8rem;
+  border-radius: 1.2rem;
+  white-space: nowrap; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  border: 1px solid rgba(167, 139, 250, 0.8);
+  color: #e0e7ff;
+  font-size: 1.05rem;
+  box-shadow: 0 10px 30px rgba(167, 139, 250, 0.6);
+  text-shadow: 0 0 10px rgba(255,255,255,0.4);
+}
+.sign-node:hover .sign-tooltip { opacity: 1; transform: translateX(-50%) translateY(-20px); }
+
+
+/* --- Sticky Footer (Improved blending) --- */
+.compatibility-footer {
+  position: sticky; bottom: 0; width: 100%; z-index: 20;
+  padding: 3rem 1.5rem 2rem 1.5rem;
+  background: linear-gradient(180deg, rgba(17,24,39,0) 0%, rgba(17,24,39,0.99) 30%, #060a10 60%);
+  text-align: center; color: white;
+  border-top: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 -20px 50px rgba(0,0,0,0.8);
+}
+.compatibility-footer h4 { color: #f0f3ff; text-shadow: 0 0 12px rgba(255,255,255,0.5); }
+.compatibility-footer p { color: #bdbdbe; font-size: 1.1rem; }
+
+/* Styling for the zoomed-in constellation view */
+.zoomed-constellation-view {
+  width: 100%;
+  height: 100%; /* Allows it to take full height of its flexible parent */
+  min-height: calc(100vh - 10rem); /* Ensures it always takes most of screen height */
+  max-height: calc(100vh - 6rem); /* Allows it to grow, but prevents it from going *too* far off screen */
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column; /* Stacks the constellation name and the constellation group */
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: visible; /* CRITICAL: Allows content, especially glows, to render fully without clipping */
+  padding: 2rem 1rem; /* Adds some padding around the content */
+}
+
+/* Adjustments for the constellation group when it's zoomed */
+.zoomed-constellation-view .constellation-group {
+    width: 100%;
+    height: auto; /* Allow height to be determined by content, or set a flex-grow */
+    flex-grow: 1; /* Allow it to take up available space in the column */
+    position: relative; /* Ensure it's a positioning context for its children */
+    transform: none !important; /* Overwrite hover transforms */
+    box-shadow: none !important; /* Overwrite hover box shadows */
+    border: none !important;
+    background-color: transparent !important;
+}
+
+.zoomed-constellation-view .constellation-group .constellation-name {
+    font-size: 3rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Make sure the signs-container gets proper space and acts as positioning context */
+.zoomed-constellation-view .signs-container {
+    position: relative; /* Crucial: Make this the positioning context for its absolute children */
+    height: 100%; /* Take full height of its flexible parent */
+    width: 100%; /* Take full width */
+    max-width: 600px; /* Cap its max width for better aspect ratio */
+    max-height: 600px; /* Cap its max height as well */
+    aspect-ratio: 1 / 1; /* Ensure it maintains a square aspect ratio if possible */
+    margin: auto; /* Center it within the available space */
+    overflow: hidden; /* IMPORTANT: Keep background stars & potential spills of glow for very large stars contained within this visual area */
+}
+
+
+/* More prominent lines and stars when zoomed */
+.zoomed-constellation-view .constellation-lines-svg {
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 15px #c084fc) drop-shadow(0 0 40px #a855f7) blur(1px);
+    animation: line-subtle-pulse 1s ease-in-out infinite alternate; /* Faster, more distinct pulse when zoomed */
+}
+
+.zoomed-constellation-view .star {
+    box-shadow:
+        0 0 8px 1.5px #fff,
+        0 0 30px 6px #e0e7ff,
+        0 0 80px 15px #a78bfa,
+        0 0 130px 25px rgba(167, 139, 250, 1.2);
+}
+
+/* Specific star sizes when zoomed */
+.zoomed-constellation-view .sign-node-1 .star { width: 40px; height: 40px; }
+.zoomed-constellation-view .sign-node-2 .star { width: 30px; height: 30px; }
+.zoomed-constellation-view .sign-node-3 .star { width: 35px; height: 35px; }
+.zoomed-constellation-view .sign-node-4 .star { width: 28px; height: 28px; }
+
+/* No hover on sign nodes when zoomed in, as they are already large */
+.zoomed-constellation-view .sign-node:hover .star {
+    transform: none !important;
+    box-shadow: inherit;
+    animation: main-star-twinkle 1s ease-in-out infinite alternate;
+}
+
+/* User/selected sign colors when zoomed */
+.zoomed-constellation-view .user-sign .star {
+    box-shadow:
+        0 0 10px 2px #fef08a,
+        0 0 35px 8px #fde047,
+        0 0 90px 20px #facc15,
+        0 0 150px 30px rgba(250, 202, 24, 1.2);
+}
+
+.zoomed-constellation-view .selected-sign .star {
+    box-shadow:
+        0 0 10px 2px #6ee7b7,
+        0 0 35px 8px #5eead4,
+        0 0 90px 20px #2dd4bf,
+        0 0 150px 30px rgba(45, 212, 191, 1.2);
+}

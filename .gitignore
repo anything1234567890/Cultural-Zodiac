@@ -1,0 +1,29 @@
+# --- Environment Variables ---
+# Specifically ignore the .env file inside the backend folder
+backend/.env
+
+# --- Python / Backend ---
+# Ignore the Python virtual environment folder
+venv/
+__pycache__/
+
+# --- Node / Frontend ---
+# This is the .gitignore that is already inside your frontend folder.
+# We are just adding its contents here to have one master file.
+frontend/node_modules/
+frontend/build/
+frontend/.pnp.js
+frontend/.pnp.loader.js
+frontend/coverage/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# --- General ---
+# Ignore Mac and Windows system files
+.DS_Store
+Thumbs.db
