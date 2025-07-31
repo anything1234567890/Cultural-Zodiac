@@ -30,7 +30,7 @@ This is a mystical vibe check. A revelation. A prophecy for the digital soul.
 *   **Immersive Reveal Experience:** Features a dramatic tarot card flip animation, a deep voice-over proclaiming "The stars have spoken...", and a glowing, mystical UI.
 *   **The Oracle's Offering:** For users unsure what to input, the "Let the Oracle Choose" feature provides a curated, high-quality cultural artifact to start their journey.
 *   **Deep Taste Analysis:** The results screen includes a "Vibe Check" to show the core tags of your taste and a "Taste Twin" to reveal a personality that matches your cultural soul.
-    *   ***Note on API Status:*** *The backend integration for the Qloo API (which powers the Vibe Check & Taste Twin) is fully implemented. For this hackathon demo, we are using high-quality fallback data to ensure a stable and consistent user experience, as the live API endpoint was not performing as expected.*
+    *   ***Note on API Status:*** *The backend integration for the Qloo API (which powers the Vibe Check & Taste Twin) is fully implemented. For thee qloo llm hackathon demo, we are using high-quality fallback data to ensure a stable and consistent user experience, as the live API endpoint was not performing as expected.*
 *   **Interactive Constellation Map:** Explore the full cosmos of signs in a beautiful, animated night sky. Discover your sign's constellation and check your "Cosmic Kinship" with other signs.
 
   ### 🛠️ Tech Stack
