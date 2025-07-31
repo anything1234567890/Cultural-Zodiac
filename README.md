@@ -17,12 +17,11 @@ This is a mystical vibe check. A revelation. A prophecy for the digital soul.
 **Offer your tastes. Discover your sign. Find your place in the Cosmic Map.**
 
 ### 🌟 Live Demo
-
+[Visit the Cultural Zodiac site](culturalzodiac.netlify.app)
 
 
 ### 🎬 Demo Video
-
-
+https://youtu.be/74amzEO4qWE
 
 ### ✨ Features
 
