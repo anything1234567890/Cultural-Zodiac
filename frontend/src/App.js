@@ -153,7 +153,7 @@ function App() {
 
   const handleCopyText = () => {
     if (!zodiacResult) return;
-    const shareText = `The Oracle has spoken! My Cultural Zodiac is the ${zodiacResult.name} ${zodiacResult.emoji}\n\nThe Prophecy: "${zodiacResult.prophecy}"\n\nDiscover your own sign here 👉 [Your App URL]\n#CulturalZodiac`;
+    const shareText = `The Oracle has spoken! My Cultural Zodiac is the ${zodiacResult.name} ${zodiacResult.emoji}\n\nThe Prophecy: "${zodiacResult.prophecy}"\n\nDiscover your own sign here 👉 [culturalzodiac.netlify.app]\n#CulturalZodiac`;
     navigator.clipboard.writeText(shareText).then(() => {
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
