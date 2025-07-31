@@ -17,7 +17,7 @@ This is a mystical vibe check. A revelation. A prophecy for the digital soul.
 **Offer your tastes. Discover your sign. Find your place in the Cosmic Map.**
 
 ### 🌟 Live Demo
-[\culturalzodiac.netlify.app\]
+['\culturalzodiac.netlify.app\']
 
 
 ### 🎬 Demo Video
