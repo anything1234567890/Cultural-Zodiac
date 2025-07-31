@@ -88,7 +88,7 @@ To get a local copy up and running, follow these simple steps.
 ---
 ### 🔮 Future Plans
 
-Our vision for Cultural Zodiac extends far beyond this prototype. We aim to build it into a deeply personal and social cultural discovery engine.
+I vision for Cultural Zodiac extends far beyond this prototype. I aim to build it into a deeply personal and social cultural discovery engine.
 
 *   **The Oracle's Library:** Evolve the "Let the Oracle Choose" feature into a dynamic, database-driven system. The Oracle would pull from a vast, curated library of high-quality cultural artifacts, ensuring every suggestion is unique and leads to a great result.
 
