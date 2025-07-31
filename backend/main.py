@@ -13,6 +13,14 @@ import re
 # --- Configuration & Setup ---
 load_dotenv()
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 QLOO_API_KEY = os.getenv("QLOO_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -21,15 +29,6 @@ if not QLOO_API_KEY or not GEMINI_API_KEY:
     raise RuntimeError("API keys for Qloo or Gemini not found in .env file.")
 
 genai.configure(api_key=GEMINI_API_KEY)
-
-# --- Middleware ---
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # --- [UPGRADED] Zodiac Signs Data with Compatibility ---
 CULTURAL_ZODIAC_SIGNS = [
