@@ -1,19 +1,18 @@
-# --- FILE: backend/main.py (VERSION WITH CONSTELLATION DATA) ---
-
 import os
 import requests
 import google.generativeai as genai
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import json
-import re
+import random
 
 # --- Configuration & Setup ---
 load_dotenv()
 app = FastAPI()
+
+# This middleware configuration is correct and will now work with the fixed endpoint.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -25,34 +24,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def root():
-    return {"message": "Server is running"}
-
-class ZodiacRequest(BaseModel):
-    text: str
-
-@app.api_route("/get-zodiac", methods=["POST", "OPTIONS"])
-async def get_zodiac(request: Request):
-    if request.method == "OPTIONS":
-        return JSONResponse(content={"message": "CORS preflight success"}, status_code=200)
-
-    body = await request.json()
-    text = body.get("text")
-
-    # TODO: Your actual zodiac logic goes here
-    return {"zodiac": "Dreamwave"}
-
-
+# --- API Key Loading and Gemini Configuration ---
+# We load keys here to use them later.
 QLOO_API_KEY = os.getenv("QLOO_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if not QLOO_API_KEY or not GEMINI_API_KEY:
-    raise RuntimeError("API keys for Qloo or Gemini not found in .env file.")
-
+# The app CANNOT function without Gemini, so we check for its key at startup.
+if not GEMINI_API_KEY:
+    raise RuntimeError("CRITICAL: GEMINI_API_KEY not found. The application cannot start.")
 genai.configure(api_key=GEMINI_API_KEY)
 
-# --- [UPGRADED] Zodiac Signs Data with Compatibility ---
+
+# --- Pydantic Models for Request Body Validation ---
+class TasteInput(BaseModel):
+    name: str
+    type: str
+
+class TastePreferences(BaseModel):
+    inputs: list[TasteInput]
+
+
+# --- Data Stores (Zodiac Signs & Demo Data) ---
+# This data remains unchanged.
 CULTURAL_ZODIAC_SIGNS = [
     { "name": "Neon Graveyard Poet", "emoji": "👾", "keywords": ["cyberpunk", "glitch", "ai", "melancholy", "dark", "digital", "ethereal"], "mood": "Melancholic", "era": "Futuristic", "absurdity": 3, "rare": False, "description": "A holographic bard singing binary laments for deleted souls.", "constellation": "Haunted Technology", "compatibility": "Finds a kindred spirit in the 'AI-Generated Appalachian Horror Folk,' sharing a love for uncanny, machine-born art." },
     { "name": "Time-Traveling Karaoke Virus", "emoji": "📼", "keywords": ["y2k", "pop", "glitch", "boy bands", "retro", "chaotic", "playful"], "mood": "Nostalgic", "era": "2000s", "absurdity": 4, "rare": True, "description": "A rogue MP3 that haunts your Winamp with distorted love ballads.", "constellation": "Haunted Technology", "compatibility": "Vibes with the 'VHS Fitness Instructor Ghost,' sharing a chaotic energy from a bygone millennium." },
@@ -72,11 +65,6 @@ CULTURAL_ZODIAC_SIGNS = [
     { "name": "Haunted Smart Fridge Ambient", "emoji": "🧊", "keywords": ["ambient", "drone", "mundane", "uncanny", "minimalist", "modern"], "mood": "Hypnotic", "era": "Modern", "absurdity": 3, "rare": False, "description": "Your appliance composes ambient tracks about the yogurt you forgot in 2017.", "constellation": "Domestic Surrealism", "compatibility": "Is the minimalist counterpart to the 'Sentient IKEA Furniture Techno,' both creating the soundscape of modern life." }
 ]
 
-# Pydantic Models... (unchanged)
-class TasteInput(BaseModel): name: str; type: str
-class TastePreferences(BaseModel): inputs: list[TasteInput]
-
-# --- [UPGRADED] The "Golden Path" Demo Data ---
 DEMO_DATA_MAP = {
     "blade runner_street fighter ii": {
         "name": "Abandoned Arcade Heartthrob", "emoji": "🕹️", "constellation": "Absurd Nostalgia", "description": "Croons through broken speakers to ghosts of high scores past.", "prophecy": "Your soul is a cassette tape of bittersweet 80s movie themes, forever chasing the neon-drenched high scores of yesterday.", "symbolism": "This sign reflects your love for retro-futuristic aesthetics and the romantic melancholy of a bygone digital era.", "absurdity": 3, "rare": False, "compatibility": "Is the perfect dance partner for the 'Abandoned Space Station Disco,' both hopelessly romantic and lost in time.",
@@ -85,34 +73,120 @@ DEMO_DATA_MAP = {
     }
 }
 
-# --- [UPGRADED] API Endpoint ---
+
+@app.get("/")
+def read_root():
+    return {"message": "Cultural Zodiac Oracle is waiting..."}
+
+
 @app.post("/get-zodiac")
 async def get_zodiac(preferences: TastePreferences):
+    """
+    This endpoint determines a user's Cultural Zodiac Sign.
+    It follows a specific logic path:
+    1. Check for a hard-coded "demo" key for instant, predictable results.
+    2. If not a demo, attempt to enrich user inputs with data from the Qloo API.
+    3. Use the Gemini API to analyze inputs (and Qloo data, if available) to select a sign.
+    4. If any API call fails, provide a graceful fallback result so the user isn't blocked.
+    """
     input_names = sorted([p.name.lower().strip() for p in preferences.inputs if p.name])
     demo_key = "_".join(input_names)
-    print(f"DEBUG: Generated demo_key: '{demo_key}'")
-
     final_result = {}
 
+    # --- Path 1: The "Golden Path" Demo ---
     if demo_key in DEMO_DATA_MAP:
         print(f"SUCCESS: Demo key '{demo_key}' found. Returning mock data instantly.")
         final_result = DEMO_DATA_MAP[demo_key]
+
+    # --- Path 2: Live API Call Logic ---
     else:
-        # --- This is the fallback logic for live calls ---
-        print("INFO: No demo key found. This logic would make live API calls.")
-        # For the purpose of this demo, we will just pick a random sign
-        # This simulates a Gemini response without using your quota
-        import random
-        chosen_sign = random.choice(CULTURAL_ZODIAC_SIGNS)
-        final_result = {
-            **chosen_sign,
-            "prophecy": "The Oracle's vision is vast, revealing a spirit of eclectic and unpredictable tastes.",
-            "symbolism": "This sign represents a journey through varied cultural landscapes, guided by curiosity.",
-            "taste_tags": ["Eclectic", "Unpredictable", "Curious"],
-            "taste_twin": {"name": "The Wanderer", "emoji": "🧭", "bio": "Their path is not on any map; they delight in discovering hidden gems across the cultural spectrum."}
-        }
-    
-    # --- [NEW] Attach the full list of signs to EVERY response ---
+        print(f"INFO: Not a demo key. Proceeding with live API call for inputs: {input_names}")
+        qloo_taste_tags = []
+
+        # --- Step 2a: Attempt to use Qloo for data enrichment ---
+        if QLOO_API_KEY:
+            print("INFO: Qloo API key found. Attempting to fetch taste tags.")
+            for item in preferences.inputs:
+                try:
+                    # Note: Qloo uses `q` for query parameter
+                    params = {'q': item.name}
+                    headers = {'x-api-key': QLOO_API_KEY}
+                    response = requests.get("https://api.qloo.com/v2/tastes", params=params, headers=headers)
+                    if response.status_code == 200:
+                        tags = response.json().get('data', {}).get('tags', [])
+                        print(f"  > Qloo success for '{item.name}'. Found tags: {tags}")
+                        qloo_taste_tags.extend(tags)
+                    else:
+                        print(f"  > WARNING: Qloo API returned status {response.status_code} for '{item.name}'.")
+                except Exception as e:
+                    print(f"  > WARNING: Qloo API call failed for '{item.name}': {e}. Proceeding without its data.")
+        else:
+            print("INFO: No Qloo API key found. Proceeding without Qloo data enrichment.")
+
+        # --- Step 2b: Use Gemini for analysis and generation ---
+        try:
+            signs_text_list = "\n".join([f"- {s['name']}: {s['description']}" for s in CULTURAL_ZODIAC_SIGNS])
+            
+            enrichment_text = ""
+            if qloo_taste_tags:
+                unique_tags = sorted(list(set(qloo_taste_tags)))
+                enrichment_text = f"An analysis of these tastes revealed the following related keywords: {', '.join(unique_tags)}."
+
+            prompt = f"""
+            You are the 'Cultural Zodiac Oracle'. Your task is to analyze a user's taste preferences and assign them one of the pre-defined cultural zodiac signs.
+
+            Here are the available signs:
+            {signs_text_list}
+
+            User's direct tastes: {', '.join(input_names)}
+            {enrichment_text}
+
+            Based on all this information, select the SINGLE most fitting sign from the list.
+            Then, generate a short, mystical 'prophecy' and a 'symbolism' explanation based on their tastes and the chosen sign.
+
+            Respond ONLY with a JSON object in the following format. Do not add any other text or markdown formatting.
+            {{
+              "chosen_sign_name": "Name of the sign from the list",
+              "prophecy": "Your creative and mystical prophecy here.",
+              "symbolism": "Your analysis of the symbolism here."
+            }}
+            """
+
+            model = genai.GenerativeModel('gemini-pro')
+            response = model.generate_content(prompt)
+            gemini_response_text = response.text.strip().replace("```json", "").replace("```", "")
+            gemini_data = json.loads(gemini_response_text)
+            
+            chosen_sign_name = gemini_data.get("chosen_sign_name")
+            chosen_sign = next((sign for sign in CULTURAL_ZODIAC_SIGNS if sign["name"] == chosen_sign_name), None)
+            
+            if not chosen_sign:
+                print(f"WARNING: Gemini returned a sign name ('{chosen_sign_name}') not in our list. Falling back to random.")
+                chosen_sign = random.choice(CULTURAL_ZODIAC_SIGNS)
+
+            final_result = {
+                **chosen_sign,
+                "prophecy": gemini_data.get("prophecy", "A mysterious prophecy unfolds..."),
+                "symbolism": gemini_data.get("symbolism", "The stars are not yet clear."),
+                "taste_tags": ["AI-Generated", "Eclectic", "Dynamic"],
+                "taste_twin": {"name": "The Oracle's Choice", "emoji": "🔮", "bio": "Their essence was divined from the digital ether, a unique blend of culture and code."}
+            }
+            print(f"SUCCESS: Gemini analysis complete. Assigned sign: '{chosen_sign['name']}'")
+
+        # --- Path 3: The "Catastrophic Failure" Fallback ---
+        except Exception as e:
+            print(f"ERROR: Gemini API call failed: {e}. Falling back to 'Oracle's chosen' random sign.")
+            chosen_sign = random.choice(CULTURAL_ZODIAC_SIGNS)
+            final_result = {
+                **chosen_sign,
+                "prophecy": "The cosmic rays are interfering! The Oracle could not be reached, but your spirit strongly aligns with this sign nonetheless.",
+                "symbolism": "This sign was chosen by fate, as a connection to the digital oracle was temporarily lost. It reflects the beautiful chaos of the universe.",
+                "taste_tags": ["Fated", "Cosmic Interference", "Meant To Be"],
+                "taste_twin": {"name": "The Glitch", "emoji": "⚡", "bio": "Sometimes the most interesting results come from unexpected errors in the system. Their path is one of serendipity."}
+            }
+
+    # --- Final Step: Return the result in a consistent format ---
+    # This structure is sent back to the frontend regardless of which path was taken.
     return {
         "result": final_result,
         "all_signs": CULTURAL_ZODIAC_SIGNS
