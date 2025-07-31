@@ -24,6 +24,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+def root():
+    return {"message": "Server is running"}
+
 class ZodiacRequest(BaseModel):
     text: str
 
