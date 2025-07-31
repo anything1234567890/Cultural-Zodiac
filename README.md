@@ -18,11 +18,11 @@ This is a mystical vibe check. A revelation. A prophecy for the digital soul.
 
 ### 🌟 Live Demo
 
-*[Link to your deployed application will go here!]*
+
 
 ### 🎬 Demo Video
 
-*(I highly recommend you record a 30-second GIF of your app in action and place it here. Use a tool like ScreenToGif or Kap. It makes a huge difference!)*
+
 
 ### ✨ Features
 
