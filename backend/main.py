@@ -5,6 +5,7 @@ import requests
 import google.generativeai as genai
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import json
@@ -23,6 +24,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+class ZodiacRequest(BaseModel):
+    text: str
+
+@app.api_route("/get-zodiac", methods=["POST", "OPTIONS"])
+async def get_zodiac(request: Request):
+    if request.method == "OPTIONS":
+        return JSONResponse(content={"message": "CORS preflight success"}, status_code=200)
+
+    body = await request.json()
+    text = body.get("text")
+
+    # TODO: Your actual zodiac logic goes here
+    return {"zodiac": "Dreamwave"}
 
 
 QLOO_API_KEY = os.getenv("QLOO_API_KEY")
